@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Advanced Teacher Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ffffff20;
+    }
+
+    .status-btn {
+      padding: 6px 10px;
+      margin: 2px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .present-btn {
+      background: #22c55e;
+    }
+
+    .absent-btn {
+      background: #f97316;
+    }
+
+    .selected {
+      outline: 2px solid white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>AttendPro</h2>
+      <ul>
+        <li>Dashboard</li>
+        <li>Attendance</li>
+      </ul>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <div class="topbar">
+        <h2>Teacher Dashboard</h2>
+        <p id="date"></p>
+      </div>
+
+      <!-- Subject Select -->
+      <select id="subject">
+        <option value="">Select Subject</option>
+        <option>Math</option>
+        <option>Chemistry</option>
+        <option>English</option>
+        <option>Hindi</option>
+        <option>Physics</option>
+        <option>Biology</option>
+
+      </select>
+
+      <br><br>
+
+      <!-- Start Lecture -->
+      <button onclick="createLecture()">Start Lecture</button>
+
+      <h3 id="status"></h3>
+
+      <!-- Table -->
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Present</th>
+            <th>Absent</th>
+          </tr>
+        </thead>
+        <tbody id="students"></tbody>
+      </table>
+
+      <br>
+      <button onclick="submitAttendance()">Submit Attendance</button>
+
+    </main>
+  </div>
+
+  <script>
+
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+      alert("Login first");
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("date").innerText =
+      new Date().toDateString();
+
+    let lectureId = null;
+    let records = [];
+
+    // 🚀 CREATE LECTURE
+    async function createLecture() {
+      const subject = document.getElementById("subject").value;
+
+      if (!subject) {
+        alert("Select subject first!");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:3000/teacher/create-lecture", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subject,
+            teacherId: user._id
+          })
+        });
+
+        const data = await res.json();
+        lectureId = data._id;
+
+        document.getElementById("status").innerText =
+          "Lecture started for " + subject;
+
+        loadStudents();
+
+      } catch (err) {
+        console.log(err);
+        alert("Error creating lecture");
+      }
+    }
+
+    // 👨‍🎓 LOAD STUDENTS
+    async function loadStudents() {
+      try {
+        const res = await fetch("http://localhost:3000/admin/users");
+        let users = await res.json();
+
+        const students = users.filter(u => u.role === "student");
+
+        const tbody = document.getElementById("students");
+        tbody.innerHTML = "";
+
+        if (students.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='3'>No students found</td></tr>";
+          return;
+        }
+
+        students.forEach(s => {
+          tbody.innerHTML += `
+        <tr id="row-${s._id}">
+          <td>${s.name || "No Name"}</td>
+          <td>
+            <button class="status-btn present-btn" onclick="mark('${s._id}','present')">✔</button>
+          </td>
+          <td>
+            <button class="status-btn absent-btn" onclick="mark('${s._id}','absent')">✖</button>
+          </td>
+        </tr>
+      `;
+        });
+
+      } catch (err) {
+        console.error(err);
+        alert("Error loading students");
+      }
+    }
+
+    // ✅ MARK FUNCTION
+    function mark(studentId, status) {
+      if (!lectureId) {
+        alert("Start lecture first!");
+        return;
+      }
+
+      // remove previous record
+      records = records.filter(r => r.studentId !== studentId);
+
+      // add new record
+      records.push({
+        lectureId: String(lectureId),
+        studentId: String(studentId),   // ✅ FIX
+        status
+      });
+
+      console.log("Records:", records); // 🔍 debug
+
+      // UI highlight
+      const row = document.getElementById("row-" + studentId);
+      const buttons = row.querySelectorAll("button");
+
+      buttons.forEach(btn => btn.classList.remove("selected"));
+
+      if (status === "present") {
+        buttons[0].classList.add("selected");
+      } else {
+        buttons[1].classList.add("selected");
+      }
+    }
+
+    // 📤 SUBMIT ATTENDANCE (FIXED)
+    async function submitAttendance() {
+      if (!lectureId) {
+        alert("Start lecture first!");
+        return;
+      }
+
+      if (records.length === 0) {
+        alert("Mark attendance!");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:3000/teacher/mark-attendance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lectureId: lectureId, // ✅ VERY IMPORTANT
+            records: records
+          })
+        });
+
+        const data = await res.json();
+        console.log(data);
+
+        alert("Attendance submitted successfully ✅");
+
+        records = [];
+
+      } catch (err) {
+        console.log(err);
+        alert("Error submitting attendance");
+      }
+    }
+
+  </script>
+
+</body>
+
+</html>
