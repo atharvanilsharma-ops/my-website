@@ -63,11 +63,11 @@ router.post("/mark-attendance", async (req, res) => {
 
       } else {
         await Attendance.create({
-          studentId: studentObjectId,   // ✅ FIX
-          lectureId: lectureObjectId,   // ✅ FIX
-          status: r.status,
-          date: new Date()
-        });
+  studentId: String(r.studentId),   // ✅ THIS LINE
+  lectureId: lectureId,
+  status: r.status,
+  date: new Date()
+});
       }
     }
 
