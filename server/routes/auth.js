@@ -47,10 +47,11 @@ router.post("/login", async (req, res) => {
     });
 
 
-    res.json({
-      message: "Login successful",
-      user: user
-    });
+  
+res.json({
+  message: "Login successful",
+  user: user
+});
 
   } catch (err) {
     console.log("🔥 LOGIN ERROR:", err);
@@ -58,9 +59,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-res.json({
-  message: "Login successful",
-  user: user
-});
+
 
 module.exports = router;
