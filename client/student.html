@@ -389,7 +389,7 @@ async function loadData() {
 ======================= */
 
 function updateDashboard() {
-
+  console.log("Sample record:", attendanceData[0]);
   const filtered = attendanceData.filter(a => {
   if (!a.date) return false;   // ✅ safety check
   const d = new Date(a.date);
