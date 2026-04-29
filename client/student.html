@@ -392,9 +392,10 @@ if (!attendanceData || attendanceData.length === 0) {
 function updateDashboard() {
 
   const filtered = attendanceData.filter(a => {
-    const d = new Date(a.date || Date.now());
-    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-  });
+  if (!a.date) return false;   // ✅ safety check
+  const d = new Date(a.date);
+  return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+});
 
   const total = filtered.length;
   const present = filtered.filter(a => a.status === "present").length;
