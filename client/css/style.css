@@ -1,0 +1,316 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #fff;
+}
+
+/* LAYOUT */
+.container {
+  display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar h2 {
+  margin-bottom: 30px;
+  color: #38bdf8;
+}
+
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar li {
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.sidebar li:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  padding: 25px;
+}
+
+/* TOPBAR */
+.topbar {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* CARDS */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap: 20px;
+}
+
+.card {
+  padding: 25px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(8px);
+  transition: 0.3s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.total {
+  border-left: 5px solid #6366f1;
+}
+
+.present {
+  border-left: 5px solid #22c55e;
+}
+
+.absent {
+  border-left: 5px solid #f97316;
+}
+
+/* CHART */
+.chart-container {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.05);
+}
+
+/* CALENDAR */
+.calendar {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.day {
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  background: rgba(255,255,255,0.05);
+  transition: 0.2s;
+}
+
+.day:hover {
+  transform: scale(1.05);
+}
+
+.present-day {
+  background: #22c55e;
+}
+
+.absent-day {
+  background: #f97316;
+}
+
+.no-lecture {
+  background: #334155;
+}
+
+/* BUTTONS */
+button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  margin: 5px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+/* INPUTS */
+input, select {
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+  width: 250px;
+}
+
+#percentage {
+  margin-top: 10px;
+  color: #38bdf8;
+}
+
+#monthTitle {
+  margin-bottom: 10px;
+}
+
+.present-day { background: #22c55e; }
+.absent-day { background: #f97316; }
+.no-lecture { background: #334155; }
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+}
+
+/* Layout */
+.container {
+  display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: rgba(30,41,59,0.7);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+/* Main */
+.main {
+  flex: 1;
+  padding: 30px;
+}
+
+/* Sections */
+.section {
+  background: rgba(30,41,59,0.6);
+  backdrop-filter: blur(12px);
+  padding: 20px;
+  border-radius: 15px;
+  margin-top: 20px;
+  transition: 0.3s;
+}
+
+.section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+/* Cards */
+.cards {
+  display: flex;
+  gap: 20px;
+}
+
+.card {
+  flex: 1;
+  padding: 20px;
+  border-radius: 15px;
+  background: rgba(51,65,85,0.5);
+  text-align: center;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+/* Progress */
+.progress-bar {
+  background: #334155;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  padding: 5px;
+  text-align: center;
+}
+
+/* Calendar */
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.day, .header-day {
+  padding: 10px;
+  text-align: center;
+  border-radius: 6px;
+}
+
+.header-day {
+  background: #1e293b;
+  font-weight: bold;
+}
+
+.day {
+  background: #475569;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.day:hover {
+  transform: scale(1.1);
+}
+
+.present-day { background: #22c55e; }
+.absent-day { background: #f97316; }
+.no-lecture { background: #334155; }
+.empty { background: transparent; }
+
+/* Buttons */
+button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #38bdf8;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #0ea5e9;
+}
+
+/* Input */
+input {
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .container {
+    flex-direction: column;
+  }
+} 

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+      padding: 12px;
+      border-bottom: 1px solid #ffffff20;
+      text-align: center;
+    }
+
+    .search-box {
+      margin-top: 20px;
+    }
+
+    .delete-btn {
+      background: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>AttendPro</h2>
+      <ul>
+        <li>Dashboard</li>
+        <li>Users</li>
+      </ul>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <div class="topbar">
+        <h2>Admin Panel</h2>
+      </div>
+
+      <!-- CREATE USER -->
+      <h3>Create User</h3>
+
+      <input type="text" id="name" placeholder="Enter Name">
+      <input type="email" id="email">
+      <input type="password" id="password">
+      <select id="role">
+        <option value="student">Student</option>
+        <option value="teacher">Teacher</option>
+      </select>
+
+      <br><br>
+      <button onclick="createUser()">Create User</button>
+
+      <!-- SEARCH + FILTER -->
+      <div class="search-box">
+        <input id="search" placeholder="Search user..." onkeyup="loadUsers()">
+
+        <select id="filter" onchange="loadUsers()">
+          <option value="">All</option>
+          <option value="student">Students</option>
+          <option value="teacher">Teachers</option>
+        </select>
+      </div>
+
+      <!-- USERS TABLE -->
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="users"></tbody>
+      </table>
+
+    </main>
+  </div>
+
+
+<script>
+const BASE_URL = "https://my-website-ej59.onrender.com";
+
+/* =======================
+   CREATE USER
+======================= */
+async function createUser() {
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const role = document.getElementById("role").value;
+
+  if (!name || !email || !password) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/admin/create-user`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, email, password, role })
+    });
+
+    const data = await res.json();
+    console.log(data);
+
+    alert(data.message || "User Created ✅");
+
+    // Clear inputs
+    document.getElementById("name").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+
+    loadUsers();
+
+  } catch (err) {
+    console.log(err);
+    alert("Error creating user ❌");
+  }
+}
+
+
+/* =======================
+   LOAD USERS
+======================= */
+async function loadUsers() {
+  try {
+    const res = await fetch(`${BASE_URL}/admin/users`);
+    let users = await res.json();
+
+    console.log("Users:", users);
+
+    const search = document.getElementById("search").value.toLowerCase();
+    const filter = document.getElementById("filter").value;
+
+    // Search
+    if (search) {
+      users = users.filter(u =>
+        (u.name || "").toLowerCase().includes(search) ||
+        (u.email || "").toLowerCase().includes(search)
+      );
+    }
+
+    // Filter
+    if (filter) {
+      users = users.filter(u => u.role === filter);
+    }
+
+    const tbody = document.getElementById("users");
+    tbody.innerHTML = "";
+
+    if (users.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='4'>No users found</td></tr>";
+      return;
+    }
+
+    users.forEach(u => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${u.name || "No Name"}</td>
+          <td>${u.email}</td>
+          <td>${u.role}</td>
+          <td>
+            <button class="delete-btn" onclick="deleteUser('${u._id}')">
+              Delete
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+  } catch (err) {
+    console.log(err);
+    alert("Error loading users ❌");
+  }
+}
+
+
+/* =======================
+   DELETE USER
+======================= */
+async function deleteUser(id) {
+  try {
+    const res = await fetch(`${BASE_URL}/admin/delete/${id}`, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+    alert(data.message || "User Deleted");
+
+    loadUsers();
+
+  } catch (err) {
+    console.log(err);
+    alert("Error deleting user ❌");
+  }
+}
+
+
+/* =======================
+   INITIAL LOAD
+======================= */
+window.onload = loadUsers;
+
+</script>
+
+
+</body>
+
+</html>
