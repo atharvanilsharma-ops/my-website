@@ -348,42 +348,41 @@ let currentYear = new Date().getFullYear();
 ======================= */
 async function loadData() {
   try {
-    console.log("Fetching attendance for:", user._id);
+    console.log("🚀 Fetching attendance for user:", user._id);
 
     const res = await fetch(`${BASE_URL}/student/attendance/${user._id}`);
 
-    const text = await res.text();   // 👈 IMPORTANT
-    console.log("RAW RESPONSE:", text);
+    // ❗ Check if API failed
+    if (!res.ok) {
+      console.log("❌ API Error:", res.status);
+      attendanceData = [];
+      updateDashboard();
+      return;
+    }
 
-    const data = JSON.parse(text);
+    const data = await res.json();
 
-    console.log("Parsed Data:", data);
+    // 🔍 DEBUG LOGS (VERY IMPORTANT)
+    console.log("✅ User ID:", user._id);
+    console.log("📊 Raw API Data:", data);
 
+    // ✅ Ensure correct format
     if (!Array.isArray(data)) {
+      console.log("⚠️ Data is not array, resetting...");
       attendanceData = [];
     } else {
       attendanceData = data;
     }
 
+    console.log("📦 Final Attendance Data:", attendanceData);
+
   } catch (err) {
-    console.log("Error:", err);
+    console.log("❌ Fetch Error:", err);
     attendanceData = [];
   }
 
+  // 🔄 Always update UI
   updateDashboard();
-}
-
-if (!attendanceData || attendanceData.length === 0) {
-  document.getElementById("total").innerText = 0;
-  document.getElementById("present").innerText = 0;
-  document.getElementById("absent").innerText = 0;
-  document.getElementById("percentage").innerText = "0%";
-  document.getElementById("progressFill").style.width = "0%";
-  document.getElementById("prediction").innerText = "No attendance data";
-
-  buildCalendar([]);
-  buildHeatmap();
-  return;
 }
 /* =======================
    UPDATE DASHBOARD
