@@ -328,10 +328,10 @@
     </div>
   </div>
 
-  <script>
+<script>
 const BASE_URL = "https://my-website-ej59.onrender.com";
 
-// Get logged user
+// ✅ Get logged user
 const user = JSON.parse(localStorage.getItem("user"));
 
 if (!user || !user._id) {
@@ -344,15 +344,14 @@ let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 
 /* =======================
-   LOAD DATA (FIXED)
+   LOAD DATA
 ======================= */
 async function loadData() {
   try {
-    console.log("🚀 Fetching attendance for user:", user._id);
+    console.log("🚀 Fetching attendance for:", user._id);
 
     const res = await fetch(`${BASE_URL}/student/attendance/${user._id}`);
 
-    // ❗ Check if API failed
     if (!res.ok) {
       console.log("❌ API Error:", res.status);
       attendanceData = [];
@@ -362,46 +361,35 @@ async function loadData() {
 
     const data = await res.json();
 
-    // 🔍 DEBUG LOGS (VERY IMPORTANT)
-    console.log("✅ User ID:", user._id);
-    console.log("📊 Raw API Data:", data);
+    console.log("📊 Raw Data:", data);
 
-    // ✅ Ensure correct format
-    if (!Array.isArray(data)) {
-      console.log("⚠️ Data is not array, resetting...");
-      attendanceData = [];
-    } else {
-      attendanceData = data;
-    }
-
-    console.log("📦 Final Attendance Data:", attendanceData);
+    attendanceData = Array.isArray(data) ? data : [];
 
   } catch (err) {
     console.log("❌ Fetch Error:", err);
     attendanceData = [];
   }
 
-  // 🔄 Always update UI
   updateDashboard();
 }
+
 /* =======================
    UPDATE DASHBOARD
 ======================= */
-
 function updateDashboard() {
-  console.log("Sample record:", attendanceData[0]);
+
+  console.log("📦 Final Data:", attendanceData);
+
   const filtered = attendanceData.filter(a => {
-  if (!a.date) return false;
+    if (!a.date) return false;
+    const d = new Date(a.date);
+    if (isNaN(d)) return false;
 
-  const d = new Date(a.date);
-
-  if (isNaN(d)) return false;   // ✅ VERY IMPORTANT
-
-  return (
-    d.getMonth() === currentMonth &&
-    d.getFullYear() === currentYear
-  );
-});
+    return (
+      d.getMonth() === currentMonth &&
+      d.getFullYear() === currentYear
+    );
+  });
 
   const total = filtered.length;
   const present = filtered.filter(a => a.status === "present").length;
@@ -416,31 +404,41 @@ function updateDashboard() {
   document.getElementById("progressFill").style.width = percent + "%";
 
   const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  document.getElementById("monthTitle").innerText = months[currentMonth] + " " + currentYear;
+  document.getElementById("monthTitle").innerText =
+    months[currentMonth] + " " + currentYear;
 
   /* ===== PIE CHART ===== */
-  if (window.chart) window.chart.destroy();
+  if (window.chart) {
+    try { window.chart.destroy(); } catch {}
+  }
 
   window.chart = new Chart(document.getElementById("chart"), {
     type: "doughnut",
     data: {
       labels: ["Present", "Absent"],
-      datasets: [{
-        data: [present, absent]
-      }]
+      datasets: [{ data: [present, absent] }]
     },
     options: { maintainAspectRatio: false }
   });
 
   /* ===== TREND GRAPH ===== */
-  if (window.trend) window.trend.destroy();
+  if (window.trend) {
+    try { window.trend.destroy(); } catch {}
+  }
 
   const map = {};
   attendanceData.forEach(a => {
-    const d = new Date(a.date).toLocaleDateString();
-    if (!map[d]) map[d] = { p: 0, t: 0 };
-    map[d].t++;
-    if (a.status === "present") map[d].p++;
+    if (!a.date) return;
+
+    const d = new Date(a.date);
+    if (isNaN(d)) return;
+
+    const key = d.toLocaleDateString();
+
+    if (!map[key]) map[key] = { p: 0, t: 0 };
+
+    map[key].t++;
+    if (a.status === "present") map[key].p++;
   });
 
   const labels = Object.keys(map);
@@ -450,9 +448,7 @@ function updateDashboard() {
     type: "line",
     data: {
       labels,
-      datasets: [{
-        data: values
-      }]
+      datasets: [{ data: values }]
     },
     options: { maintainAspectRatio: false }
   });
@@ -463,7 +459,6 @@ function updateDashboard() {
   buildCalendar(filtered);
   buildHeatmap();
 }
-
 
 /* =======================
    CALENDAR
@@ -494,7 +489,12 @@ function buildCalendar(data) {
     div.innerText = i;
     div.classList.add("day");
 
-    const records = data.filter(a => new Date(a.date).getDate() === i);
+    const records = data.filter(a => {
+      if (!a.date) return false;
+      const d = new Date(a.date);
+      if (isNaN(d)) return false;
+      return d.getDate() === i;
+    });
 
     if (records.length > 0) {
       div.classList.add(records.some(r => r.status === "absent") ? "absent" : "present");
@@ -505,7 +505,6 @@ function buildCalendar(data) {
     cal.appendChild(div);
   }
 }
-
 
 /* =======================
    HEATMAP
@@ -518,9 +517,12 @@ function buildHeatmap() {
     const date = new Date();
     date.setDate(date.getDate() - i);
 
-    const dayRecords = attendanceData.filter(a =>
-      new Date(a.date).toDateString() === date.toDateString()
-    );
+    const dayRecords = attendanceData.filter(a => {
+      if (!a.date) return false;
+      const d = new Date(a.date);
+      if (isNaN(d)) return false;
+      return d.toDateString() === date.toDateString();
+    });
 
     let level = 0;
 
@@ -539,22 +541,26 @@ function buildHeatmap() {
   }
 }
 
-
 /* =======================
    NAVIGATION
 ======================= */
 function prevMonth() {
   currentMonth--;
-  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  if (currentMonth < 0) {
+    currentMonth = 11;
+    currentYear--;
+  }
   updateDashboard();
 }
 
 function nextMonth() {
   currentMonth++;
-  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth > 11) {
+    currentMonth = 0;
+    currentYear++;
+  }
   updateDashboard();
 }
-
 
 /* =======================
    START
