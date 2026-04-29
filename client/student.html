@@ -391,9 +391,16 @@ async function loadData() {
 function updateDashboard() {
   console.log("Sample record:", attendanceData[0]);
   const filtered = attendanceData.filter(a => {
-  if (!a.date) return false;   // ✅ safety check
+  if (!a.date) return false;
+
   const d = new Date(a.date);
-  return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+
+  if (isNaN(d)) return false;   // ✅ VERY IMPORTANT
+
+  return (
+    d.getMonth() === currentMonth &&
+    d.getFullYear() === currentYear
+  );
 });
 
   const total = filtered.length;
